@@ -71,7 +71,8 @@ const reflexion = regl({
 // Touch is handled separately because fps.js prevents the browser's synthetic click.
 const activateGalleryItem = (clientX, clientY, mode) => {
 	const clickYaw = fps.fmouse[1] + ((clientX / window.innerWidth) - 0.5) * fovX();
-	const clickPitch = fps.fmouse[0] + (0.5 - clientY / window.innerHeight) * fovY();
+	// The camera's positive pitch looks downward, so screen Y and target elevation use the opposite sign.
+	const clickPitch = fps.fmouse[0] + (clientY / window.innerHeight - 0.5) * fovY();
 	const candidates = placement.batch().filter(p => p.file && !p.isMannequinPrototype);
 	let best = null;
 	let bestScore = Infinity;
@@ -85,7 +86,7 @@ const activateGalleryItem = (clientX, clientY, mode) => {
 		if (distance > 25 || distance < 0.1) continue;
 		const targetYaw = Math.atan2(cx - fps.pos[0], fps.pos[2] - cz);
 		const yawDiff = Math.atan2(Math.sin(targetYaw - clickYaw), Math.cos(targetYaw - clickYaw));
-		const targetPitch = Math.atan2(2.1 - fps.pos[1], distance);
+		const targetPitch = -Math.atan2(2.1 - fps.pos[1], distance);
 		const pitchDiff = targetPitch - clickPitch;
 		const halfHeight = p.clickHalfHeight || p.globalScale || (p.width * 1.4);
 		const yawLimit = Math.atan2(p.width * 1.12, distance) + 0.025;
@@ -139,10 +140,11 @@ document.addEventListener('touchend', event => {
 }, { capture: true, passive: true });
 
 document.addEventListener('click', event => {
-	if (event.target && event.target.closest && event.target.closest('.survey-link')) return;
+	if (event.target && event.target.closest && event.target.closest('.gallery-actions')) return;
 	// Ignore the synthetic click some mobile browsers emit after touchend.
 	if (Date.now() - lastTouchHandledAt < 600) return;
-	if (event.target && event.target.tagName !== 'CANVAS') return;
+	// Pick from the actual click position; some desktop browsers report the body as target
+	// when the WebGL canvas fills the viewport, so do not require tagName === CANVAS.
 	activateGalleryItem(event.clientX, event.clientY);
 });
 regl.frame(({
