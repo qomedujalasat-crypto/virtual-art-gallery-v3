@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+      #welcome-overlay { position: fixed; inset: 0; z-index: 2147483646; display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; background: rgba(18,16,13,.42); opacity: 1; visibility: visible; transition: opacity .7s ease, visibility .7s ease; pointer-events: none; }
+      #welcome-overlay.is-hidden { opacity: 0; visibility: hidden; }
+      .welcome-title { max-width: 900px; padding: 24px 30px; border: 1px solid rgba(224,202,157,.85); border-radius: 14px; background: rgba(38,31,23,.88); box-shadow: 0 8px 30px rgba(0,0,0,.28); color: #fff8e9; text-align: center; font-family: Tahoma,Arial,sans-serif; font-size: clamp(20px,3vw,34px); font-weight: 600; line-height: 1.9; }
+      @media (max-width: 600px) { .welcome-title { padding: 20px 18px; border-radius: 12px; line-height: 1.8; } }
       .gallery-actions {
         position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%);
         z-index: 2147483647; display: flex; align-items: center; justify-content: center;
@@ -41,12 +45,28 @@
     </style>
   </head>
   <body>
+    <div id="welcome-overlay" role="status" aria-live="polite"><div class="welcome-title">نمایشگاه مجازی دومین جشنواره کشوری طراحی و دوخت لباس دانش‌آموزی قم ـ ۱۴۰۵</div></div>
     <nav class="gallery-actions" aria-label="امکانات نمایشگاه">
       <button class="action-button" id="download-artwork" type="button">دانلود تصویر اثر</button>
       <a class="action-button survey-link" href="https://digiform.ir/wab710d2e6" target="_blank" rel="noopener noreferrer">شرکت در نظرسنجی</a>
       <span class="action-help">برای دانلود، اثر را روبه‌روی دوربین و در مرکز صفحه قرار دهید.</span>
     </nav>
     <script>
+      (function () {
+        var welcome = document.getElementById('welcome-overlay');
+        if (!welcome) return;
+        var dismissWelcome = function () {
+          welcome.classList.add('is-hidden');
+          window.removeEventListener('pointermove', dismissWelcome);
+          window.removeEventListener('pointerdown', dismissWelcome);
+          window.removeEventListener('touchstart', dismissWelcome);
+          window.removeEventListener('keydown', dismissWelcome);
+        };
+        window.addEventListener('pointermove', dismissWelcome, { once: true, passive: true });
+        window.addEventListener('pointerdown', dismissWelcome, { once: true, passive: true });
+        window.addEventListener('touchstart', dismissWelcome, { once: true, passive: true });
+        window.addEventListener('keydown', dismissWelcome, { once: true });
+      })();
       document.getElementById('download-artwork').addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
