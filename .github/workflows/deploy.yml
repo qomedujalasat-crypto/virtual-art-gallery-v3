@@ -3,7 +3,7 @@ name: Build and publish gallery
 on:
   push:
     branches:
-      - main
+      - gallery-v3-feature-test
   workflow_dispatch:
 
 permissions:
