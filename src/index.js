@@ -69,7 +69,7 @@ const reflexion = regl({
 
 // Pick the artwork/flyer under the actual screen coordinate.
 // Touch is handled separately because fps.js prevents the browser's synthetic click.
-const activateGalleryItem = (clientX, clientY) => {
+const activateGalleryItem = (clientX, clientY, mode) => {
 	const clickYaw = fps.fmouse[1] + ((clientX / window.innerWidth) - 0.5) * fovX();
 	const clickPitch = fps.fmouse[0] + (0.5 - clientY / window.innerHeight) * fovY();
 	const candidates = placement.batch().filter(p => p.file && !p.isMannequinPrototype);
@@ -94,7 +94,14 @@ const activateGalleryItem = (clientX, clientY) => {
 		const score = Math.pow(yawDiff / yawLimit, 2) + Math.pow(pitchDiff / pitchLimit, 2);
 		if (score < bestScore) { best = p; bestScore = score; }
 	}
-	if (!best) return;
+	if (!best) {
+		if (mode === 'download') alert('لطفاً دوربین را طوری تنظیم کنید که یک اثر در مرکز صفحه باشد.');
+		return;
+	}
+	if (mode === 'download' && best.isSurveyFlyer) {
+		alert('برای دانلود، دوربین را روی تصویر یک اثر لباس قرار دهید.');
+		return;
+	}
 	if (best.isSurveyFlyer) {
 		window.open('https://digiform.ir/wab710d2e6', '_blank', 'noopener,noreferrer');
 		return;
@@ -106,6 +113,10 @@ const activateGalleryItem = (clientX, clientY) => {
 	link.click();
 	link.remove();
 };
+
+window.addEventListener('gallery-download-front-artwork', () => {
+	activateGalleryItem(window.innerWidth / 2, window.innerHeight / 2, 'download');
+});
 
 let galleryTouchStart = null;
 let lastTouchHandledAt = 0;
