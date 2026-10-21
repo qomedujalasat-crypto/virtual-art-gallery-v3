@@ -97,6 +97,6 @@ module.exports = (regl) => {
 		});
 	return function (batch) {
 		painting(batch);
-		drawText(batch);
+		drawText(batch.filter(p => p.text && p.textmodel));
 	}
 };
