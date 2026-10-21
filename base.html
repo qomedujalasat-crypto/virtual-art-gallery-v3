@@ -7,9 +7,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+      .survey-link {
+        position: fixed; right: 14px; bottom: 14px; z-index: 20;
+        display: block; width: 72px; max-height: 112px;
+        border: 2px solid rgba(255,255,255,.9); border-radius: 5px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.35); overflow: hidden;
+      }
+      .survey-link img { display: block; width: 100%; height: auto; }
+      .survey-link:focus-visible { outline: 3px solid #c5a76a; outline-offset: 3px; }
+      @media (max-width: 600px) {
+        .survey-link { width: 56px; right: 8px; bottom: 8px; }
+      }
     </style>
   </head>
   <body>
+    <a class="survey-link" href="https://digiform.ir/wab710d2e6" target="_blank" rel="noopener noreferrer" aria-label="باز کردن فرم نظرسنجی">
+      <img src="images/%D9%81%D8%B1%D9%85%20%D9%86%D8%B8%D8%B1%20%D8%B3%D9%86%D8%AC%DB%8C%20.png" alt="فرم نظرسنجی؛ برای ثبت رأی کلیک کنید">
+    </a>
     <script inline-htmlify></script>
   </body>
 </html>
