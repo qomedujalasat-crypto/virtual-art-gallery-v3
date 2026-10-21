@@ -68,6 +68,8 @@ module.exports = (regl, {placements, getAreaIndex}) => {
         mat4.rotateY(model, model, -angle);
         surveyBatch[index] = {
             ...painting,
+            // Store the flyer position so click hit-testing targets the flyer, not its artwork.
+            pos: [...flyerPos],
             tex: surveyTexture,
             text: null,
             textmodel: null,
