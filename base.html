@@ -7,23 +7,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
-      .survey-link {
-        position: fixed; right: 14px; bottom: 14px; z-index: 2147483647; pointer-events: auto;
-        display: block; width: 72px; max-height: 112px;
-        border: 2px solid rgba(255,255,255,.9); border-radius: 5px;
-        box-shadow: 0 2px 12px rgba(0,0,0,.35); overflow: hidden;
+      .gallery-actions {
+        position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+        z-index: 2147483647; display: flex; align-items: center; justify-content: center;
+        gap: 10px; max-width: calc(100vw - 20px); padding: 10px 12px;
+        box-sizing: border-box; border-radius: 12px; background: rgba(25, 24, 21, .88);
+        color: #fff; font-family: Arial, sans-serif; text-align: center;
+        box-shadow: 0 2px 14px rgba(0,0,0,.35);
       }
-      .survey-link img { display: block; width: 100%; height: auto; }
-      .survey-link:focus-visible { outline: 3px solid #c5a76a; outline-offset: 3px; }
+      .gallery-actions .action-button {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-height: 42px; padding: 9px 14px; border: 1px solid #d7c39a;
+        border-radius: 8px; background: #f6f0e4; color: #27231d;
+        font: 600 14px/1.35 Arial, sans-serif; cursor: pointer; white-space: nowrap;
+        text-decoration: none; box-sizing: border-box;
+      }
+      .gallery-actions .action-button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+      .gallery-actions .action-help { font-size: 12px; line-height: 1.5; max-width: 180px; }
       @media (max-width: 600px) {
-        .survey-link { width: 56px; right: 8px; bottom: 8px; }
+        .gallery-actions { bottom: 8px; gap: 6px; padding: 7px; border-radius: 10px; }
+        .gallery-actions .action-button { min-height: 40px; padding: 8px 9px; font-size: 12px; white-space: normal; }
+        .gallery-actions .action-help { display: none; }
       }
     </style>
   </head>
   <body>
-    <a class="survey-link" href="https://digiform.ir/wab710d2e6" target="_blank" rel="noopener noreferrer" aria-label="باز کردن فرم نظرسنجی" onclick="event.stopPropagation()">
-      <img src="images/%D9%81%D8%B1%D9%85%20%D9%86%D8%B8%D8%B1%20%D8%B3%D9%86%D8%AC%DB%8C%20.png" alt="فرم نظرسنجی؛ برای ثبت رأی کلیک کنید">
-    </a>
+    <nav class="gallery-actions" aria-label="امکانات نمایشگاه">
+      <button class="action-button" id="download-artwork" type="button">دانلود تصویر اثر</button>
+      <a class="action-button survey-link" href="https://digiform.ir/wab710d2e6" target="_blank" rel="noopener noreferrer">شرکت در نظرسنجی</a>
+      <span class="action-help">برای دانلود، اثر را روبه‌روی دوربین و در مرکز صفحه قرار دهید.</span>
+    </nav>
+    <script>
+      document.getElementById('download-artwork').addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.dispatchEvent(new CustomEvent('gallery-download-front-artwork'));
+      });
+    </script>
     <script inline-htmlify></script>
   </body>
 </html>
