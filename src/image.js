@@ -3,7 +3,6 @@
 const api = require('../api/api');
 const selectedApi = new URLSearchParams(window.location.search).get("api");
 const dataAccess = api[selectedApi] || api[api.default];
-const text = require('./text');
 
 let paintingCache = {};
 let unusedTextures = [];
@@ -36,16 +35,14 @@ async function loadImage(regl, p, res) {
 		) : 0;
 		console.log(aniso);
 	}
-	
-	let image, title;
+
+	let image;
 	try {
 		const data = await dataAccess.fetchImage(p, dynamicQual(res));
-		title = 'دومین جشنواره کشوری طراحی و دوخت لباس دانش‌آموزی';
-		// Resize image to a power of 2 to use mipmap (faster than createImageBitmap resizing)
 		image = await createImageBitmap(data.image);
+		ctx.clearRect(0, 0, resizeCanvas.width, resizeCanvas.height);
 		ctx.drawImage(image, 0, 0, resizeCanvas.width, resizeCanvas.height);
 	} catch(e) {
-		// Try again with a lower resolution, otherwise return an empty image
 		console.error(e);
 		return res == "high" ? await loadImage(regl, p, "low") : emptyImage(regl);
 	}
@@ -57,7 +54,7 @@ async function loadImage(regl, p, res) {
 			aniso,
 			flipY: true
 		}),
-		width=>text.init((unusedTextures.pop() || regl.texture), title, width),
+		null,
 		image.width / image.height
 	];
 }
@@ -89,7 +86,7 @@ module.exports = {
 		loadImage(regl, p, res).then(([tex, textGen]) => {
 			p.loading = false;
 			p.tex = tex;
-			p.text = textGen(p.width);
+			p.text = null;
 		});
 	},
 	unload: (p) => {
