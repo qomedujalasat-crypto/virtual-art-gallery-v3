@@ -75,6 +75,7 @@ module.exports = (regl, {placements, getAreaIndex}) => {
             textmodel: null,
             model,
             width: flyerHalfWidth,
+            clickHalfHeight: flyerHalfHeight,
             isSurveyFlyer: true
         };
     };
@@ -184,7 +185,7 @@ module.exports = (regl, {placements, getAreaIndex}) => {
         mat4.fromTranslation(textmodel, [pos[0], 2.1 + globalScale, pos[2]]);
         mat4.scale(textmodel, textmodel, [2,2,2]);
         mat4.rotateY(textmodel, textmodel, -angle);
-        batch[placementIndex] = { ...p, vseg, angle, model, textmodel, text, width, textGen:null,
+        batch[placementIndex] = { ...p, vseg, angle, model, textmodel, text, width, clickHalfHeight: globalScale, textGen:null,
             pos: [...pos], dir: [...dir], segLen, globalScale, horiz, vert };
         addSurveyFlyer(batch[placementIndex], placementIndex);
         createMannequin(batch[placementIndex]);
