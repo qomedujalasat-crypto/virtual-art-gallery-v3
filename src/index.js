@@ -67,23 +67,32 @@ const reflexion = regl({
 	depth: { enable: true, mask: false }
 });
 
-// Click a wall flyer to open the survey, or an artwork to download it.
-document.addEventListener('click', (event) => {
-	if (!event.target || event.target.tagName !== 'CANVAS') return;
-	const clickYaw = fps.fmouse[1] + ((event.clientX / window.innerWidth) - 0.5) * fovX();
+// Pick the artwork/flyer under the actual screen coordinate.
+// Touch is handled separately because fps.js prevents the browser's synthetic click.
+const activateGalleryItem = (clientX, clientY) => {
+	const clickYaw = fps.fmouse[1] + ((clientX / window.innerWidth) - 0.5) * fovX();
+	const clickPitch = fps.fmouse[0] + (0.5 - clientY / window.innerHeight) * fovY();
 	const candidates = placement.batch().filter(p => p.file && !p.isMannequinPrototype);
-	let best = null, bestDiff = Infinity;
+	let best = null;
+	let bestScore = Infinity;
 	for (const p of candidates) {
 		if (!p.pos || !p.dir || !p.segLen || !p.width) continue;
-		const cx = p.pos[0] + (p.dir[0] / p.segLen) * p.width;
-		const cz = p.pos[2] + (p.dir[1] / p.segLen) * p.width;
-		const targetYaw = Math.atan2(cx - fps.pos[0], fps.pos[2] - cz);
-		const diff = Math.abs(Math.atan2(Math.sin(targetYaw - clickYaw), Math.cos(targetYaw - clickYaw)));
+		const ux = p.dir[0] / p.segLen;
+		const uz = p.dir[1] / p.segLen;
+		const cx = p.pos[0] + ux * p.width;
+		const cz = p.pos[2] + uz * p.width;
 		const distance = Math.hypot(cx - fps.pos[0], cz - fps.pos[2]);
-		if (diff < bestDiff && diff < 0.28 && distance < 25) {
-			best = p;
-			bestDiff = diff;
-		}
+		if (distance > 25 || distance < 0.1) continue;
+		const targetYaw = Math.atan2(cx - fps.pos[0], fps.pos[2] - cz);
+		const yawDiff = Math.atan2(Math.sin(targetYaw - clickYaw), Math.cos(targetYaw - clickYaw));
+		const targetPitch = Math.atan2(2.1 - fps.pos[1], distance);
+		const pitchDiff = targetPitch - clickPitch;
+		const halfHeight = p.clickHalfHeight || p.globalScale || (p.width * 1.4);
+		const yawLimit = Math.atan2(p.width * 1.12, distance) + 0.025;
+		const pitchLimit = Math.atan2(halfHeight * 1.12, distance) + 0.025;
+		if (Math.abs(yawDiff) > yawLimit || Math.abs(pitchDiff) > pitchLimit) continue;
+		const score = Math.pow(yawDiff / yawLimit, 2) + Math.pow(pitchDiff / pitchLimit, 2);
+		if (score < bestScore) { best = p; bestScore = score; }
 	}
 	if (!best) return;
 	if (best.isSurveyFlyer) {
@@ -96,8 +105,35 @@ document.addEventListener('click', (event) => {
 	document.body.appendChild(link);
 	link.click();
 	link.remove();
-});
+};
 
+let galleryTouchStart = null;
+let lastTouchHandledAt = 0;
+document.addEventListener('touchstart', event => {
+	if (event.touches.length !== 1) { galleryTouchStart = null; return; }
+	const t = event.touches[0];
+	galleryTouchStart = { x: t.clientX, y: t.clientY, time: event.timeStamp };
+}, { capture: true, passive: true });
+
+document.addEventListener('touchend', event => {
+	if (!galleryTouchStart || !event.changedTouches.length) return;
+	const t = event.changedTouches[0];
+	const moved = Math.hypot(t.clientX - galleryTouchStart.x, t.clientY - galleryTouchStart.y);
+	const elapsed = event.timeStamp - galleryTouchStart.time;
+	galleryTouchStart = null;
+	if (moved > 18 || elapsed > 350) return;
+	if (event.target && event.target.closest && event.target.closest('.survey-link')) return;
+	lastTouchHandledAt = Date.now();
+	activateGalleryItem(t.clientX, t.clientY);
+}, { capture: true, passive: true });
+
+document.addEventListener('click', event => {
+	if (event.target && event.target.closest && event.target.closest('.survey-link')) return;
+	// Ignore the synthetic click some mobile browsers emit after touchend.
+	if (Date.now() - lastTouchHandledAt < 600) return;
+	if (event.target && event.target.tagName !== 'CANVAS') return;
+	activateGalleryItem(event.clientX, event.clientY);
+});
 regl.frame(({
 	time
 }) => {
