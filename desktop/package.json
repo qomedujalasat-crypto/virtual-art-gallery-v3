@@ -1,0 +1,40 @@
+{
+  "name": "virtual-art-gallery-desktop",
+  "version": "1.0.0",
+  "description": "Offline Windows desktop edition of Virtual Art Gallery",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "dist:win": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "35.7.5",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "org.virtualartgallery.festival",
+    "productName": "Virtual Art Gallery",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "gallery/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "Virtual-Art-Gallery-Offline-${version}-Windows-x64.exe"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Virtual Art Gallery: ARTIC paintings</title>
+    <meta name="description" content="Explore a virtual art gallery on your browser. This procedurally generated architecture displays the paintings of the Art Institute of Chicago museum.">
+    <meta charset="utf-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+      .gallery-caption {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+        padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+        box-sizing: border-box; text-align: center; direction: rtl;
+        color: #4b3825; background: rgba(250, 246, 238, 0.88);
+        border-top: 1px solid rgba(130, 101, 66, 0.28);
+        font-family: Tahoma, Arial, sans-serif; font-size: clamp(13px, 2vw, 18px);
+        line-height: 1.5; pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="gallery-caption">دومین جشنواره کشوری طراحی و دوخت لباس دانش‌آموزی</div>
+    <script inline-htmlify></script>
+  </body>
+</html>

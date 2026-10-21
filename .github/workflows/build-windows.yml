@@ -1,0 +1,53 @@
+name: Build offline Windows app
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "desktop/**"
+      - ".github/workflows/build-windows.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install gallery dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build gallery
+        run: npm run build
+
+      - name: Prepare offline gallery files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force desktop/gallery | Out-Null
+          Copy-Item build.html desktop/gallery/build.html
+          Copy-Item images desktop/gallery/images -Recurse -Force
+
+      - name: Install desktop packaging dependencies
+        working-directory: desktop
+        run: npm install --no-audit --no-fund
+
+      - name: Package Windows executable
+        working-directory: desktop
+        run: npm run dist:win
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: Virtual-Art-Gallery-Offline-Windows-x64
+          path: desktop/dist/*.exe
+          if-no-files-found: error
+          retention-days: 30
