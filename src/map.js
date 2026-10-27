@@ -246,6 +246,16 @@ module.exports = function (n = mapSize, r = cellSize, w = wallThickness, m = wal
 	].map(([x, y]) => [x * s, y * s]);
 	console.time('gen mesh');
 	let segments = border.slice(0, -1).map((p, i) => [p, border[i + 1]]);
+	// Add an orthogonal W-like sequence of interior gallery dividers.
+	// These partitions are deliberately visible from the entrance and keep every turn at 90 degrees.
+	const wDivider = [
+		[6, 30], [6, 40], [14, 40], [14, 30],
+		[22, 30], [22, 40], [30, 40], [30, 30],
+		[38, 30], [38, 40], [42, 40]
+	].map(([x, z]) => [x, z].map(v => v / 48 * s));
+	for (let i = 0; i < wDivider.length - 1; i++) {
+		segments.push([wDivider[i], wDivider[i + 1]]);
+	}
 	let normal = segments
 		.map(([[x1, y1], [x2, y2]]) => [Math.sign(y1 - y2), 0, Math.sign(x2 - x1)])
 		.flatMap((v) => Array(4).fill(v));
