@@ -210,6 +210,13 @@ function genGrid(segments, n, r) {
 	// Ignore short segments for painting placement
 	placements = placements.filter(([[ax, ay], [bx, by]]) => Math.hypot(ax - bx, ay - by) > 1);
 	placements = reorderPlacements(placements, r);
+	// Reserve the inner cross-wall directly opposite the entrance for image 1.
+	// For the 48-unit U layout this is the horizontal wall from (16,16) to (32,16).
+	const entranceOppositeWall = [[s / 3, s / 3], [2 * s / 3, s / 3]];
+	placements = placements.filter(([[ax, az], [bx, bz]]) =>
+		!(Math.abs(az - s / 3) < 0.01 && Math.abs(bz - s / 3) < 0.01 &&
+			Math.min(ax, bx) >= s / 3 - 0.01 && Math.max(ax, bx) <= 2 * s / 3 + 0.01));
+	placements.unshift(entranceOppositeWall);
 	const areas = placements.map(place => [
         (Math.round((place[0][0] + place[1][0]) / 2 / r + 0.5) - 0.5) * r,
         (Math.round((place[0][1] + place[1][1]) / 2 / r + 0.5) - 0.5) * r
@@ -246,14 +253,32 @@ module.exports = function (n = mapSize, r = cellSize, w = wallThickness, m = wal
 	].map(([x, y]) => [x * s, y * s]);
 	console.time('gen mesh');
 	let segments = border.slice(0, -1).map((p, i) => [p, border[i + 1]]);
-	let normal = segments
-		.map(([[x1, y1], [x2, y2]]) => [Math.sign(y1 - y2), 0, Math.sign(x2 - x1)])
-		.flatMap((v) => Array(4).fill(v));
-	let position = segments.flat().flatMap(([x, y]) => [[x, 0, y], [x, h, y]]);
+	// Build each wall as a thin solid: both visible faces, top, and end caps.
+	let normal = [];
+	let position = [];
+	const pushQuad = (points, nrm) => {
+		position.push(...points);
+		normal.push(...Array(4).fill(nrm));
+	};
+	segments.forEach(([[x1, z1], [x2, z2]]) => {
+		const dx = x2 - x1, dz = z2 - z1;
+		const length = Math.hypot(dx, dz) || 1;
+		const nx = dz / length, nz = -dx / length;
+		const half = w / 2;
+		const ax1 = x1 + nx * half, az1 = z1 + nz * half;
+		const ax2 = x2 + nx * half, az2 = z2 + nz * half;
+		const bx1 = x1 - nx * half, bz1 = z1 - nz * half;
+		const bx2 = x2 - nx * half, bz2 = z2 - nz * half;
+		pushQuad([[ax1,0,az1],[ax1,h,az1],[ax2,0,az2],[ax2,h,az2]], [nx,0,nz]);
+		pushQuad([[bx2,0,bz2],[bx2,h,bz2],[bx1,0,bz1],[bx1,h,bz1]], [-nx,0,-nz]);
+		pushQuad([[ax1,h,az1],[bx1,h,bz1],[ax2,h,az2],[bx2,h,bz2]], [0,1,0]);
+		pushQuad([[x1,0,z1],[x1,h,z1],[ax1,0,az1],[ax1,h,az1]], [-dx/length,0,-dz/length]);
+		pushQuad([[bx2,0,bz2],[bx2,h,bz2],[x2,0,z2],[x2,h,z2]], [dx/length,0,dz/length]);
+	});
 	let {getAreaIndex, getGridSegments, getGridParts, placements} = genGrid(segments, n, r);
-	//Add floor and ceilling
-	normal.push([0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0]);
-	position.push([0, h, 0], [0, h, s], [s, h, 0], [s, h, s], [-12, 0, -12], [s + 12, 0, -12], [-12, 0, s + 12], [s + 12, 0, s + 12]);
+	// Large marble apron outside the entrance prevents the exterior view from falling into the black clear color.
+	pushQuad([[0,h,0],[0,h,s],[s,h,0],[s,h,s]], [0,-1,0]);
+	pushQuad([[-100,0,-100],[s+100,0,-100],[-100,0,s+100],[s+100,0,s+100]], [0,1,0]);
 	let elements = Array(position.length / 4)
 		.fill()
 		.flatMap((_, i) => [i * 4, i * 4 + 2, i * 4 + 1, i * 4 + 1, i * 4 + 2, i * 4 + 3]);
