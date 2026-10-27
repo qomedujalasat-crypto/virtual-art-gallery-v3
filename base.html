@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
-      #welcome-overlay { position: fixed; inset: 0; z-index: 2147483646; display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; background: rgba(18,16,13,.42); opacity: 1; visibility: visible; transition: opacity .7s ease, visibility .7s ease; pointer-events: none; }
+      #welcome-overlay { position: fixed; inset: 0; z-index: 2147483646; display: flex; align-items: flex-start; justify-content: center; padding: 8vh 24px 24px; box-sizing: border-box; background: transparent; opacity: 1; visibility: visible; transition: opacity .7s ease, visibility .7s ease; pointer-events: none; }
       #welcome-overlay.is-hidden { opacity: 0; visibility: hidden; }
       .welcome-title { max-width: 900px; padding: 24px 30px; border: 1px solid rgba(224,202,157,.85); border-radius: 14px; background: rgba(38,31,23,.88); box-shadow: 0 8px 30px rgba(0,0,0,.28); color: #fff8e9; text-align: center; font-family: Tahoma,Arial,sans-serif; font-size: clamp(20px,3vw,34px); font-weight: 600; line-height: 1.9; }
       @media (max-width: 600px) { .welcome-title { padding: 20px 18px; border-radius: 12px; line-height: 1.8; } }
@@ -64,7 +64,7 @@
         };
         window.addEventListener('keydown', function (event) {
           if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.code)) dismissWelcome();
-        }, { once: true });
+        });
         window.addEventListener('touchstart', dismissWelcome, { once: true, passive: true });
         window.addEventListener('pointerdown', function () { /* Keep the entrance title visible until the visitor starts moving. */ }, { once: true, passive: true });
       })();
