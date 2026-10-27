@@ -66,7 +66,7 @@ module.exports = function ({getGridSegments, getGridParts, placements}, fovY) {
 	// The U-shaped entrance spans x=s/3..2s/3 at z=s; mapSize=3 and cellSize=6 => s=48.
 	const startX = 24;
 	const startZ = 58;
-	const startYaw = 0;
+	const startYaw = Math.PI;
 	var mouse = [0, startYaw];
 	var fmouse = [0, startYaw];
 	var dir = [0, 0, 0];
