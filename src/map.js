@@ -263,7 +263,7 @@ module.exports = function (n = mapSize, r = cellSize, w = wallThickness, m = wal
 	segments.forEach(([[x1, z1], [x2, z2]]) => {
 		const dx = x2 - x1, dz = z2 - z1;
 		const length = Math.hypot(dx, dz) || 1;
-		const nx = dz / length, nz = -dx / length;
+		const nx = -dz / length, nz = dx / length;
 		const half = w / 2;
 		const ax1 = x1 + nx * half, az1 = z1 + nz * half;
 		const ax2 = x2 + nx * half, az2 = z2 + nz * half;
@@ -271,13 +271,13 @@ module.exports = function (n = mapSize, r = cellSize, w = wallThickness, m = wal
 		const bx2 = x2 - nx * half, bz2 = z2 - nz * half;
 		pushQuad([[ax1,0,az1],[ax1,h,az1],[ax2,0,az2],[ax2,h,az2]], [nx,0,nz]);
 		pushQuad([[bx2,0,bz2],[bx2,h,bz2],[bx1,0,bz1],[bx1,h,bz1]], [-nx,0,-nz]);
-		pushQuad([[ax1,h,az1],[bx1,h,bz1],[ax2,h,az2],[bx2,h,bz2]], [0,1,0]);
+		pushQuad([[ax1,h,az1],[ax2,h,az2],[bx1,h,bz1],[bx2,h,bz2]], [0,1,0]);
 		pushQuad([[x1,0,z1],[x1,h,z1],[ax1,0,az1],[ax1,h,az1]], [-dx/length,0,-dz/length]);
 		pushQuad([[bx2,0,bz2],[bx2,h,bz2],[x2,0,z2],[x2,h,z2]], [dx/length,0,dz/length]);
 	});
 	let {getAreaIndex, getGridSegments, getGridParts, placements} = genGrid(segments, n, r);
 	// Large marble apron outside the entrance prevents the exterior view from falling into the black clear color.
-	pushQuad([[0,h,0],[0,h,s],[s,h,0],[s,h,s]], [0,-1,0]);
+	pushQuad([[0,h,0],[s,h,0],[0,h,s],[s,h,s]], [0,-1,0]);
 	pushQuad([[-100,0,-100],[s+100,0,-100],[-100,0,s+100],[s+100,0,s+100]], [0,1,0]);
 	let elements = Array(position.length / 4)
 		.fill()
