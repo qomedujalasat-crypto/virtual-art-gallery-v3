@@ -270,7 +270,36 @@ module.exports = function (n = mapSize, r = cellSize, w = wallThickness, m = wal
 	let {getAreaIndex, getGridSegments, getGridParts, placements} = genGrid(segments, n, r);
 	//Add floor and ceilling
 	normal.push([0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0]);
-	position.push([0, h, 0], [0, h, s], [s, h, 0], [s, h, s], [-12, 0, -12], [s + 12, 0, -12], [-12, 0, s + 12], [s + 12, 0, s + 12]);
+	position.push([0, h, 0], [0, h, s], [s, h, 0], [s, h, s], [-100, 0, -100], [s + 100, 0, -100], [-100, 0, s + 100], [s + 100, 0, s + 100]);
+
+	// Low-poly park trees outside the entrance: trunks and four-sided leafy crowns.
+	// The tree positions are fixed so every visitor sees the same welcoming scene.
+	const addQuad = (a, b, c, d, nrm) => {
+		position.push(a, b, c, d);
+		normal.push(nrm, nrm, nrm, nrm);
+	};
+	const addTree = (x, z, trunkHeight, crownHeight, crownRadius) => {
+		const half = 0.16;
+		const y0 = 0, y1 = trunkHeight;
+		addQuad([x-half,y0,z-half],[x+half,y0,z-half],[x-half,y1,z-half],[x+half,y1,z-half],[0,0,-1]);
+		addQuad([x+half,y0,z+half],[x-half,y0,z+half],[x+half,y1,z+half],[x-half,y1,z+half],[0,0,1]);
+		addQuad([x-half,y0,z+half],[x-half,y0,z-half],[x-half,y1,z+half],[x-half,y1,z-half],[-1,0,0]);
+		addQuad([x+half,y0,z-half],[x+half,y0,z+half],[x+half,y1,z-half],[x+half,y1,z+half],[1,0,0]);
+		const apex = [x, trunkHeight + crownHeight, z];
+		const baseY = trunkHeight - 0.15;
+		const p1 = [x-crownRadius,baseY,z-crownRadius*0.72];
+		const p2 = [x+crownRadius,baseY,z-crownRadius*0.72];
+		const p3 = [x+crownRadius,baseY,z+crownRadius*0.72];
+		const p4 = [x-crownRadius,baseY,z+crownRadius*0.72];
+		addQuad(p1,p2,apex,apex,[0.2,0.8,-0.3]);
+		addQuad(p2,p3,apex,apex,[0.7,0.8,0.2]);
+		addQuad(p3,p4,apex,apex,[0.2,0.8,0.3]);
+		addQuad(p4,p1,apex,apex,[-0.7,0.8,-0.2]);
+	};
+	// Leave a clear central approach to the doors.
+	[[10,54],[38,54],[5,59],[43,59],[16,64],[32,64],[2,69],[46,69]].forEach(([x,z],i) =>
+		addTree(x, z, 2.1 + (i%3)*0.25, 2.5 + (i%2)*0.4, 1.0 + (i%2)*0.18)
+	);
 	let elements = Array(position.length / 4)
 		.fill()
 		.flatMap((_, i) => [i * 4, i * 4 + 2, i * 4 + 1, i * 4 + 1, i * 4 + 2, i * 4 + 3]);
