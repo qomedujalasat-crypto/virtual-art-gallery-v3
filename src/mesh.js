@@ -45,8 +45,7 @@ module.exports = (regl, data, useReflexion) => {
                     float grassNoise = sin(v_pos.x * 1.7 + sin(v_pos.z * 0.7)) * 0.035
                         + sin(v_pos.z * 2.3 + v_pos.x * 0.4) * 0.02;
                     vec3 grass = vec3(0.23, 0.43, 0.20) + grassNoise;
-                    float path = smoothstep(2.8, 3.4, abs(v_pos.x - 24.0))
-                        * (1.0 - smoothstep(3.5, 4.1, abs(v_pos.x - 24.0)));
+                    float path = 1.0 - smoothstep(2.8, 3.5, abs(v_pos.x - 24.0));
                     vec3 pathColor = vec3(0.68, 0.62, 0.49);
                     totalLight = mix(grass, pathColor, path * (1.0 - smoothstep(48.0, 55.0, v_pos.z)));
                 } else {
