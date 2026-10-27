@@ -40,15 +40,36 @@ module.exports = (regl, data, useReflexion) => {
                 vec3 panelWhite = vec3(0.98, 0.98, 0.96);
                 totalLight = mix(ceilingBase, panelWhite, lightPanel);
             } else if (v_normal.y > 0.5) {
-                // Keep the marble floor muted so the artwork, not the room, draws attention.
-                vec3 stone = vec3(0.76, 0.73, 0.68);
-                vec3 textureColor = texture2D(floorTexture, v_pos.xz / 8.0).rgb;
-                totalLight = mix(stone, textureColor, 0.06);
-                float pattern = sin((v_pos.x + v_pos.z * 0.65) * 2.4
-                    + sin(v_pos.x * 0.7 + v_pos.z * 0.3) * 2.0);
-                float vein = pow(1.0 - abs(pattern), 18.0);
-                totalLight = mix(totalLight, vec3(0.55, 0.52, 0.47), vein * 0.12);
+                // Outside the gallery footprint, the floor becomes a sunlit green park.
+                if (v_pos.x < 0.0 || v_pos.x > 48.0 || v_pos.z < 0.0 || v_pos.z > 48.0) {
+                    float grassNoise = sin(v_pos.x * 1.7 + sin(v_pos.z * 0.7)) * 0.035
+                        + sin(v_pos.z * 2.3 + v_pos.x * 0.4) * 0.02;
+                    vec3 grass = vec3(0.23, 0.43, 0.20) + grassNoise;
+                    float path = smoothstep(2.8, 3.4, abs(v_pos.x - 24.0))
+                        * (1.0 - smoothstep(3.5, 4.1, abs(v_pos.x - 24.0)));
+                    vec3 pathColor = vec3(0.68, 0.62, 0.49);
+                    totalLight = mix(grass, pathColor, path * (1.0 - smoothstep(48.0, 55.0, v_pos.z)));
+                } else {
+                    // Light marble floor inside the exhibition.
+                    vec3 stone = vec3(0.76, 0.73, 0.68);
+                    vec3 textureColor = texture2D(floorTexture, v_pos.xz / 8.0).rgb;
+                    totalLight = mix(stone, textureColor, 0.06);
+                    float pattern = sin((v_pos.x + v_pos.z * 0.65) * 2.4
+                        + sin(v_pos.x * 0.7 + v_pos.z * 0.3) * 2.0);
+                    float vein = pow(1.0 - abs(pattern), 18.0);
+                    totalLight = mix(totalLight, vec3(0.55, 0.52, 0.47), vein * 0.12);
+                }
             } else {
+                // Park trees are identified by their position outside the gallery shell.
+                bool outsideGallery = v_pos.x < 0.0 || v_pos.x > 48.0 || v_pos.z < 0.0 || v_pos.z > 48.0;
+                if (outsideGallery) {
+                    if (v_pos.y > 1.8) {
+                        float leafShade = 0.88 + 0.12 * sin(v_pos.x * 2.1 + v_pos.z * 1.7 + v_pos.y);
+                        totalLight = vec3(0.12, 0.34, 0.11) * leafShade;
+                    } else {
+                        totalLight = vec3(0.30, 0.19, 0.10);
+                    }
+                } else {
                 // Medium warm wood with layered grain, subtle pores, knots, and clear board seams.
                 vec2 woodUV = vec2(v_pos.x + v_pos.z, v_pos.y);
                 float boardHeight = 0.62;
@@ -101,6 +122,7 @@ module.exports = (regl, data, useReflexion) => {
 
                 // Keep the wall in a natural medium-brown range without washing out the detail.
                 totalLight *= 0.99 + 0.015 * smoothstep(0.1, 0.12, v_pos.y);
+                }
             }
 
             float alpha = .98 + smoothstep(150., 0., dist) - v_normal.y;
