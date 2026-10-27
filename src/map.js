@@ -291,10 +291,10 @@ module.exports = function (n = mapSize, r = cellSize, w = wallThickness, m = wal
 		const p2 = [x+crownRadius,baseY,z-crownRadius*0.72];
 		const p3 = [x+crownRadius,baseY,z+crownRadius*0.72];
 		const p4 = [x-crownRadius,baseY,z+crownRadius*0.72];
-		addQuad(p1,p2,apex,apex,[0.2,0.8,-0.3]);
-		addQuad(p2,p3,apex,apex,[0.7,0.8,0.2]);
-		addQuad(p3,p4,apex,apex,[0.2,0.8,0.3]);
-		addQuad(p4,p1,apex,apex,[-0.7,0.8,-0.2]);
+		addQuad(p1,p2,apex,apex,[0.2,0.4,-0.3]);
+		addQuad(p2,p3,apex,apex,[0.7,0.4,0.2]);
+		addQuad(p3,p4,apex,apex,[0.2,0.4,0.3]);
+		addQuad(p4,p1,apex,apex,[-0.7,0.4,-0.2]);
 	};
 	// Leave a clear central approach to the doors.
 	[[10,54],[38,54],[5,59],[43,59],[16,64],[32,64],[2,69],[46,69]].forEach(([x,z],i) =>
