@@ -156,7 +156,8 @@ regl.frame(({
 	});
 	placement.update(fps.pos, fps.fmouse[1], fovX());
 	regl.clear({
-		color: [0, 0, 0, 1],
+		// Open-air sky visible beyond the gallery entrance.
+		color: [0.56, 0.76, 0.91, 1],
 		depth: 1
 	});
 	context(() => {
