@@ -253,7 +253,7 @@ module.exports = function (n = mapSize, r = cellSize, w = wallThickness, m = wal
 	let {getAreaIndex, getGridSegments, getGridParts, placements} = genGrid(segments, n, r);
 	//Add floor and ceilling
 	normal.push([0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0]);
-	position.push([0, h, 0], [0, h, s], [s, h, 0], [s, h, s], [0, 0, 0], [s, 0, 0], [0, 0, s], [s, 0, s]);
+	position.push([0, h, 0], [0, h, s], [s, h, 0], [s, h, s], [-12, 0, -12], [s + 12, 0, -12], [-12, 0, s + 12], [s + 12, 0, s + 12]);
 	let elements = Array(position.length / 4)
 		.fill()
 		.flatMap((_, i) => [i * 4, i * 4 + 2, i * 4 + 1, i * 4 + 1, i * 4 + 2, i * 4 + 3]);
