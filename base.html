@@ -62,10 +62,11 @@
           window.removeEventListener('touchstart', dismissWelcome);
           window.removeEventListener('keydown', dismissWelcome);
         };
-        window.addEventListener('pointermove', dismissWelcome, { once: true, passive: true });
-        window.addEventListener('pointerdown', dismissWelcome, { once: true, passive: true });
+        window.addEventListener('keydown', function (event) {
+          if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.code)) dismissWelcome();
+        }, { once: true });
         window.addEventListener('touchstart', dismissWelcome, { once: true, passive: true });
-        window.addEventListener('keydown', dismissWelcome, { once: true });
+        window.addEventListener('pointerdown', function () { /* Keep the entrance title visible until the visitor starts moving. */ }, { once: true, passive: true });
       })();
       document.getElementById('download-artwork').addEventListener('click', function (event) {
         event.preventDefault();
