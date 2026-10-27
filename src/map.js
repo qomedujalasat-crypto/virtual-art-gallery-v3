@@ -237,29 +237,36 @@ function genGrid(segments, n, r) {
 
 module.exports = function (n = mapSize, r = cellSize, w = wallThickness, m = wallRemoval, h = mapHeight) {
 	let s = r * Math.pow(2, n);
-	// Use a deliberate U-shaped orthogonal outline. Every corner is 90 degrees,
-	// and each wall run is at least 16 world units (about two painting spaces).
-	// Coordinates are normalized to the square footprint and scaled below.
-	let border = [
-		[0, 0], [1, 0], [1, 1], [2 / 3, 1],
-		[2 / 3, 1 / 3], [1 / 3, 1 / 3], [1 / 3, 1], [0, 1], [0, 0]
-	].map(([x, y]) => [x * s, y * s]);
 	console.time('gen mesh');
-	let segments = border.slice(0, -1).map((p, i) => [p, border[i + 1]]);
-	// Add an orthogonal W-like sequence of interior gallery dividers.
-	// These partitions are deliberately visible from the entrance and keep every turn at 90 degrees.
-	const wDivider = [
-		[6, 30], [6, 40], [14, 40], [14, 30],
-		[22, 30], [22, 40], [30, 40], [30, 30],
-		[38, 30], [38, 40], [42, 40]
-	].map(([x, z]) => [x, z].map(v => v / 48 * s));
-	for (let i = 0; i < wDivider.length - 1; i++) {
-		segments.push([wDivider[i], wDivider[i + 1]]);
-	}
-	let normal = segments
-		.map(([[x1, y1], [x2, y2]]) => [Math.sign(y1 - y2), 0, Math.sign(x2 - x1)])
+
+	// Closed-loop serpentine gallery. The entrance is centered on the north edge (z=s).
+	// The outer shell is rectangular; alternating partition gaps create a continuous
+	// back-and-forth route that can return around the perimeter to the entrance.
+	const scalePoint = ([x, z]) => [x / 48 * s, z / 48 * s];
+	let segments = [
+		// Outer walls, with a centered 16-unit entrance gap on z=48.
+		[[0, 0], [48, 0]],
+		[[48, 0], [48, 48]],
+		[[48, 48], [32, 48]],
+		[[16, 48], [0, 48]],
+		[[0, 48], [0, 0]],
+		// Interior partitions: alternating 8-unit openings at opposite ends.
+		[[0, 8], [40, 8]],
+		[[8, 16], [48, 16]],
+		[[0, 24], [40, 24]],
+		[[8, 32], [48, 32]],
+		[[0, 40], [40, 40]]
+	].map(([a, b]) => [scalePoint(a), scalePoint(b)]);
+
+	// Draw each wall from both sides. This prevents back-face culling from making
+	// walls disappear when the visitor approaches from the opposite direction.
+	const renderSegments = segments.flatMap((seg) => [seg, [seg[1], seg[0]]]);
+	let normal = renderSegments
+		.map(([[x1, z1], [x2, z2]]) => [Math.sign(z1 - z2), 0, Math.sign(x2 - x1)])
 		.flatMap((v) => Array(4).fill(v));
-	let position = segments.flat().flatMap(([x, y]) => [[x, 0, y], [x, h, y]]);
+	let position = renderSegments.flatMap((seg) =>
+		seg.flatMap(([x, z]) => [[x, 0, z], [x, h, z]])
+	);
 	let {getAreaIndex, getGridSegments, getGridParts, placements} = genGrid(segments, n, r);
 	//Add floor and ceilling
 	normal.push([0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0]);
