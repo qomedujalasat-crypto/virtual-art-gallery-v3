@@ -13,17 +13,14 @@ const loadTexture = async (texture, url) => {
 module.exports = (regl, data, useReflexion) => {
     const wallTexture = regl.texture();
     const floorTexture = regl.texture();
-    const parkTexture = regl.texture();
     loadTexture(wallTexture, "res/wall.jpg");
     loadTexture(floorTexture, "res/floor.jpg");
-    loadTexture(parkTexture, "images/park.jpg");
     return regl({
         frag: `
         precision mediump float;
         varying vec3 v_pos, v_relativepos, v_normal;
         uniform sampler2D wallTexture;
         uniform sampler2D floorTexture;
-        uniform sampler2D parkTexture;
 
         void main() {
             float dist = length(v_relativepos);
@@ -71,10 +68,6 @@ module.exports = (regl, data, useReflexion) => {
                     } else {
                         totalLight = vec3(0.30, 0.19, 0.10);
                     }
-                } else if (abs(v_pos.z) < 0.01) {
-                    // Use the uploaded park photograph on just the rear exterior wall (z = 0).
-                    vec2 parkUV = vec2(v_pos.x / 48.0, v_pos.y / 7.0);
-                    totalLight = texture2D(parkTexture, parkUV).rgb;
                 } else {
                 // Medium warm wood with layered grain, subtle pores, knots, and clear board seams.
                 vec2 woodUV = vec2(v_pos.x + v_pos.z, v_pos.y);
@@ -165,8 +158,7 @@ module.exports = (regl, data, useReflexion) => {
 
         uniforms: {
             wallTexture,
-            floorTexture,
-            parkTexture
+            floorTexture
         },
 
         elements: new Uint32Array(data.elements)
